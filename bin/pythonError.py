@@ -9,7 +9,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(1011)
 ######## File #########
 if len(argv) < 2:
-   print 'Usage:python pythontest.py RootFile.root SaveLabel[optional]'
+   print 'Usage:python pythonError.py RootFile.root SaveLabel[optional]'
    exit()
 
 infile = argv[1]
@@ -21,7 +21,7 @@ ntuple = ntuple_file.Get("tree/Ntuple")
 canvas = ROOT.TCanvas("asdf", "adsf", 800, 800)
 
 ######## LABEL & SAVE WHERE #########
-
+# this should be edited to be where you want to save output pngs
 if len(argv)>2:
    saveWhere='~/www/Research/'+argv[2]+'_'
 else:
