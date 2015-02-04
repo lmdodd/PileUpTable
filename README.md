@@ -7,6 +7,8 @@ To Set up
 
 My area was set up for CMSSW_6_2_5, so using that as example
 
+Master was checked for 7_3_0_pre1
+
 cmsrel CMSSW_6_2_5
 cd CMSSW_6_2_5/src/
 cmsenv
