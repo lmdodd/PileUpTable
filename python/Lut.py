@@ -94,8 +94,8 @@ LD_hcal_calib_v3_veto = [1.507524, 1.547824, 1.495055, 1.496223, 1.532279, 1.535
 
 #Apply ecal calibrations to EG object
 #RCTConfigProducers.eGammaECalScaleFactors = eg_calib_v1
-#RCTConfigProducers.eGammaECalScaleFactors = NoTwrCalib_ptdep
-RCTConfigProducers.eGammaECalScaleFactors = LD_ecal_calib_v1_veto
+RCTConfigProducers.eGammaECalScaleFactors = NoTwrCalib_ptdep
+#RCTConfigProducers.eGammaECalScaleFactors = LD_ecal_calib_v1_veto
 
 # We want the same scales for EG and region paths
 #Ecal calibrations for regions
@@ -104,8 +104,8 @@ RCTConfigProducers.jetMETECalScaleFactors = RCTConfigProducers.eGammaECalScaleFa
 
 # HSums
 #Hcal calibrations to regions/jets
-#RCTConfigProducers.jetMETHCalScaleFactors = NoTwrCalib_ptdep
-RCTConfigProducers.jetMETHCalScaleFactors = LD_hcal_calib_v3_veto
+RCTConfigProducers.jetMETHCalScaleFactors = NoTwrCalib_ptdep
+#RCTConfigProducers.jetMETHCalScaleFactors = LD_hcal_calib_v3_veto
 
 #L1CaloInputScalesProducer =cms.ESProducer("L1CaloInputScalesProducer",
 #L1EcalEtThresholdsPositiveEta = cms.vdouble(

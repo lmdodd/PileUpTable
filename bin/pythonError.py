@@ -2,6 +2,7 @@ from sys import argv, exit, stdout, stderr
 import sys
 import ROOT
 
+text_file = open("Lut.txt","w")
 
 # So things don't look like crap.
 ROOT.gROOT.SetStyle("Plain")
@@ -69,6 +70,7 @@ for i in range(0,22):
         hist_eta[i].SetBinContent(j,Mean)
         hist_eta[i].SetBinError(j,MeanError)
         print '%d \t %d \t %f' %(i,j,Mean)
+        text_file.write("%f, " % Mean)
     save = 'hist_eta%d.png' % i  
     hist_eta[i].Draw("p")
     hist_eta[i].Fit("pol1")
@@ -83,7 +85,7 @@ for i in range(0,22):
   for j in range(0,18):
       histos[i][j].Write()                 
 
-
+text_file.close()
 #for j in range(0,18):
 #    print ' pu: %d' % j
 #    for i in range (0,22):

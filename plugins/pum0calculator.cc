@@ -40,6 +40,7 @@
 #include "DataFormats/Scalers/interface/LumiScalers.h"
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 //typedef std::vector<edm::InputTag> VInputTag;
 //typedef std::vector<unsigned int> PackedUIntCollection;
@@ -69,6 +70,7 @@ class pum0calculator : public edm::EDAnalyzer {
 		InputTag scalerSrc_;
 		InputTag uctDigis_;
 		InputTag pvSrc_;
+		InputTag vertexSrc_;
 		InputTag genSrc_;
 
 		float instLumi_;
@@ -76,7 +78,9 @@ class pum0calculator : public edm::EDAnalyzer {
 
 		Handle<L1CaloRegionCollection> newRegions;
 		Handle<LumiScalersCollection> lumiScalers;
-		Handle<reco::VertexCollection> vertices;
+		Handle<std::vector<PileupSummaryInfo> > puInfo;
+		//53X
+		Handle<reco::VertexCollection> vertices_r;
 
 		vector<float> regionPt_;
 		vector<int> regionEta_;
@@ -108,8 +112,10 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	tree->Branch("puMult0", &puMult0_, "puMult0/i");
 	scalerSrc_ = pset.exists("scalerSrc") ? pset.getParameter<InputTag>("scalerSrc") : InputTag("scalersRawToDigi");
 	genSrc_ = pset.exists("genSrc") ? pset.getParameter<InputTag>("genSrc") : InputTag("genParticles");
-	// UCT variables
-	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("offlinePrimaryVertices");
+	//emulation variables
+	//53x
+	vertexSrc_ = pset.exists("vertexSrc") ? pset.getParameter<InputTag>("vertexSrc") : InputTag("offlinePrimaryVertices");
+	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("addPileupInfo");
 	regionLSB_ = pset.getParameter<double>("regionLSB");
 }
 
@@ -130,17 +136,26 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
 	evt.getByLabel(scalerSrc_, lumiScalers);
 	evt.getByLabel("uctDigis", newRegions);
-	evt.getByLabel(pvSrc_, vertices);
+	evt.getByLabel(pvSrc_, puInfo);
+	evt.getByLabel(vertexSrc_, vertices_r);
 
 	regionEta_.clear();
 	regionPhi_.clear();
 	regionPt_.clear();
 
 	instLumi_ = -1;
-	npvs_ = 0;
+	npvs_ = -1;
 	puMult0_ = 0;
 
-	npvs_ = vertices->size();
+        //53X
+	//npvs_ = vertices->size();
+	
+        for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
+            int BX = PVI->getBunchCrossing();
+            if (BX==0){
+               npvs_ = PVI->getPU_NumInteractions();
+	     }
+         }
 
 	if (lumiScalers->size())
 		instLumi_ = lumiScalers->begin()->instantLumi();
