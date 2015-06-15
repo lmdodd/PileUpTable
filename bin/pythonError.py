@@ -2,7 +2,7 @@ from sys import argv, exit, stdout, stderr
 import sys
 import ROOT
 
-text_file = open("Lut.txt","w")
+text_file = open("Lut_binoffsetby1.txt","w")
 
 # So things don't look like crap.
 ROOT.gROOT.SetStyle("Plain")
@@ -47,17 +47,17 @@ for i in range(0,22):
         histos[i].append( ROOT.TH1F(hname,"",400,0,200) )
 
 for event in ntuple:
-    nentries = len(event.regionPt)
-    nentriesEta = len(event.regionEta)
-#    print 'nentries'
-#    print nentries
+    #nentries = len(event.regionPt)
+    #nentriesEta = len(event.regionEta)
+    #print 'nentries'
+    #print nentries
     for pu in range(0,18):
         if event.puMult0 in range(pu*22,22+pu*22):
            #print 'pumult'
            #print event.puMult0
            for eta in range(0,22):
                for i in range(0,396):
-                   if event.regionEta[i] == eta:
+                  if event.regionEta[i] == eta:
                       histos[eta][pu].Fill(event.regionPt[i])
 
 
@@ -67,13 +67,14 @@ for i in range(0,22):
     for j in range(0,18):
         Mean =histos[i][j].GetMean()
         MeanError =histos[i][j].GetMeanError()
-        hist_eta[i].SetBinContent(j,Mean)
-        hist_eta[i].SetBinError(j,MeanError)
+        #hist_eta[i].SetBinContent(j,Mean)
+        hist_eta[i].SetBinContent(j+1,Mean)
+        hist_eta[i].SetBinError(j+1,MeanError)
         print '%d \t %d \t %f' %(i,j,Mean)
         text_file.write("%f, " % Mean)
     save = 'hist_eta%d.png' % i  
     hist_eta[i].Draw("p")
-    hist_eta[i].Fit("pol1")
+    #hist_eta[i].Fit("pol1")
     canvas.SaveAs(save) 
 
 
