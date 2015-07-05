@@ -5,7 +5,7 @@
  *
  *    Description:  
  *
- *         Author:  Laura Dodd, laura.dodd@cern.ch Evan Friis, evan.friis@cern.ch
+ *         Author:  Laura Dodd, laura.dodd@cern.ch 
  *        Company:  UW Madison
  *
  * =====================================================================================
