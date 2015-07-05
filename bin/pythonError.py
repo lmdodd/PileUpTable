@@ -40,7 +40,7 @@ hist_eta = []
 histos = []
 for i in range(0,22):
     hname_eta = "hist_eta%d" %(i)
-    hist_eta.append(ROOT.TH1F(hname_eta,"",18,0,17))
+    hist_eta.append(ROOT.TH1F(hname_eta,"",22,-0.5,21))
     histos.append([])
     for j in range(0,18):
         hname = "histos%d_%d" % (i, j) # Each histogram must have a unique name
@@ -51,14 +51,20 @@ for event in ntuple:
     #nentriesEta = len(event.regionEta)
     #print 'nentries'
     #print nentries
-    for pu in range(0,18):
-        if event.puMult0 in range(pu*22,22+pu*22):
-           #print 'pumult'
-           #print event.puMult0
-           for eta in range(0,22):
-               for i in range(0,396):
-                  if event.regionEta[i] == eta:
-                      histos[eta][pu].Fill(event.regionPt[i])
+    pumbin = event.puMult0/22
+    for i in range(0,396):
+        eta = event.regionEta[i]
+        histos[eta][pumbin].Fill(event.regionPt[i])
+
+
+#    for pu in range(0,18):
+#       if event.puMult0 in range(pu*22,22+pu*22):
+#           #print 'pumult'
+#           #print event.puMult0
+#           for eta in range(0,22):
+#               for i in range(0,396):
+#                  if event.regionEta[i] == eta:
+#                      histos[eta][pu].Fill(event.regionPt[i])
 
 
 print 'mean'

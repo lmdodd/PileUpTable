@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  pum0calculator.cc
+ *       Filename:  taucalculator.cc
  *
  *    Description:  
  *
@@ -52,19 +52,26 @@
 #include "DataFormats/TauReco/interface/PFTau.h"
 #include "DataFormats/TauReco/interface/PFTauDiscriminator.h"
 #include "DataFormats/PatCandidates/interface/Tau.h"
-
-#include "L1Trigger/PileUpTable/interface/helpers.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/METReco/interface/GenMET.h"
+#include "DataFormats/METReco/interface/GenMETFwd.h"
+#include "DataFormats/METReco/interface/CaloMET.h"
+#include "DataFormats/METReco/interface/MET.h"
 //typedef std::vector<edm::InputTag> VInputTag;
 //typedef std::vector<unsigned int> PackedUIntCollection;
+
+#include "L1Trigger/PileUpTable/interface/helpers.h"
+#include "L1Trigger/PileUpTable/interface/UCTCandidate.h"
+
 
 
 using namespace std;
 using namespace edm;
 
 
-class pum0calculator : public edm::EDAnalyzer {
+class taucalculator : public edm::EDAnalyzer {
 	public:
-		explicit pum0calculator(const edm::ParameterSet& pset);
+		explicit taucalculator(const edm::ParameterSet& pset);
 
 	private:
 		virtual void analyze(const edm::Event& evt, const edm::EventSetup& es);
@@ -72,11 +79,10 @@ class pum0calculator : public edm::EDAnalyzer {
 			return regionLSB_*cand.et();
 		}
 
-
+		void makeSums();
 		TTree* tree;
 		unsigned int run_;
 		unsigned int lumi_;
-		unsigned int puMult0_;
 		unsigned long int event_;
 
 		InputTag scalerSrc_;
@@ -93,35 +99,48 @@ class pum0calculator : public edm::EDAnalyzer {
 		Handle<std::vector<PileupSummaryInfo> > puInfo;
 		//53X
 		Handle<reco::VertexCollection> vertices_r;
+		Handle<reco::GenParticleCollection> genParticles;
+		Handle<reco::GenMETCollection> genMETColl;
 
-		vector<float> regionPt_;
-		vector<int> regionEta_;
-		vector<float> regionPhi_;
+
+		vector<float> tauPt_;
+		vector<float> tauEta_;
+		vector<float> tauPhi_;
+		vector<float> tauGenPt_;
+		vector<float> tauGenEta_;
+		vector<float> tauGenPhi_;
 
 		vector<double> sinPhi;
 		vector<double> cosPhi;
 
+
 		double regionLSB_;
-		// Add UCT-only variables
-		unsigned int minGctEtaForSums;
-		unsigned int maxGctEtaForSums;
 };
 
 
-pum0calculator::pum0calculator(const edm::ParameterSet& pset) 
+
+
+
+
+
+
+
+taucalculator::taucalculator(const edm::ParameterSet& pset) 
 {
 	// Initialize the ntuple builder
 	edm::Service<TFileService> fs;
 	tree = fs->make<TTree>("Ntuple", "Ntuple");
-	tree->Branch("regionPt", "std::vector<float>", &regionPt_);
-	tree->Branch("regionEta", "std::vector<int>", &regionEta_);
-	tree->Branch("regionPhi", "std::vector<float>", &regionPhi_);
+	tree->Branch("tauPt", "std::vector<float>", &tauPt_);
+	tree->Branch("tauEta", "std::vector<float>", &tauEta_);
+	tree->Branch("tauPhi", "std::vector<float>", &tauPhi_);
+	tree->Branch("tauGenPt", "std::vector<float>", &tauGenPt_);
+	tree->Branch("tauGenEta", "std::vector<float>", &tauGenEta_);
+	tree->Branch("tauGenPhi", "std::vector<float>", &tauGenPhi_);
 	tree->Branch("run", &run_, "run/i");
 	tree->Branch("lumi", &lumi_, "lumi/i");
 	tree->Branch("evt", &event_, "evt/l");
 	tree->Branch("npvs", &npvs_, "npvs/i");
 	tree->Branch("instlumi", &instLumi_, "instlumi/F");
-	tree->Branch("puMult0", &puMult0_, "puMult0/i");
 	scalerSrc_ = pset.exists("scalerSrc") ? pset.getParameter<InputTag>("scalerSrc") : InputTag("scalersRawToDigi");
 	genSrc_ = pset.exists("genSrc") ? pset.getParameter<InputTag>("genSrc") : InputTag("genParticles");
 	//emulation variables
@@ -129,66 +148,115 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	vertexSrc_ = pset.exists("vertexSrc") ? pset.getParameter<InputTag>("vertexSrc") : InputTag("offlinePrimaryVertices");
 	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("addPileupInfo");
 	regionLSB_ = pset.getParameter<double>("regionLSB");
+	for(unsigned int i = 0; i < L1CaloRegionDetId::N_PHI; i++) {
+		sinPhi.push_back(sin(2. * 3.1415927 * i * 1.0 / L1CaloRegionDetId::N_PHI));
+		cosPhi.push_back(cos(2. * 3.1415927 * i * 1.0 / L1CaloRegionDetId::N_PHI));
+	}
+
 }
 
 
-void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
+void taucalculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
 	// Setup meta info
 	run_ = evt.id().run();
 	lumi_ = evt.id().luminosityBlock();
 	event_ = evt.id().event();
 
-	// Get instantaneous lumi from the scalers
-	// thx to Carlo Battilana
-	//Handle<LumiScalersCollection> lumiScalers;
-	//Handle<L1CaloRegionCollection> newRegions;
-	//edm::DetSetVector<L1CaloRegionCollection> newRegion;
-	//edm::Handle<L1CaloRegionCollection>::const_iterator newRegion;
-
 	evt.getByLabel(scalerSrc_, lumiScalers);
 	evt.getByLabel("rctProd", newRegions);
 	evt.getByLabel(pvSrc_, puInfo);
 	evt.getByLabel(vertexSrc_, vertices_r);
+	evt.getByLabel(genSrc_, genParticles);
 
-	regionEta_.clear();
-	regionPhi_.clear();
-	regionPt_.clear();
+	//evt.getByLabel("genMetCalo", genMETColl);
+	//float genMET = (*genMETColl)[0].pt(); 
+	//cout<<"genMet: "<<genMET<<endl;
+	//evt.getByLabel(tauSrc_, tauObjects);
+
+
+	tauPt_.clear();
+	tauEta_.clear();
+	tauPhi_.clear();
+	tauGenPt_.clear();
+	tauGenEta_.clear();
+	tauGenPhi_.clear();
 
 	instLumi_ = -1;
 	npvs_ = -1;
-	puMult0_ = 0;
-
-        //53X
+	//53X
 	//npvs_ = vertices->size();
-	
-        for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
-            int BX = PVI->getBunchCrossing();
-            if (BX==0){
-               npvs_ = PVI->getPU_NumInteractions();
-	     }
-         }
+
+	for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
+		int BX = PVI->getBunchCrossing();
+		if (BX==0){
+			npvs_ = PVI->getPU_NumInteractions();
+		}
+	}
 
 	if (lumiScalers->size())
 		instLumi_ = lumiScalers->begin()->instantLumi();
 
+	for(size_t i = 0; i < genParticles->size(); ++ i) {
+		const reco::GenParticle & p = (*genParticles)[i];
+		int id = p.pdgId();
+		double eta = p.eta();
+		int status = p.status();
+		double pt = p.pt();
+		if (pt>20&&abs(id)==15&&fabs(eta)<3.0&&status==2){
+			//cout<<"~!~!=== IT'S A TAU ===!~!~ "<<id<<endl;
+			double phi = p.phi();
+			//double mass = p.mass();
+			//cout<<"GenPt: "<<pt<<"     GenEta: "<<eta<<"     GenPhi: "<<phi<<endl;
+			tauGenPt_.push_back(pt);
+			tauGenEta_.push_back(eta);
+			tauGenPhi_.push_back(phi);
+			unsigned int regnEta=convertGenEta(eta);
+			//cout<<"GenPhi: "<<phi<<endl;
+			unsigned int regnPhi=convertGenPhi(phi);
+			//cout<<"Gen->RegionPhi: "<<regnPhi<<endl;
+			for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin(); newRegion != newRegions->end(); newRegion++)
+			{
+				if (regnEta==newRegion->gctEta() && regnPhi==newRegion->gctPhi()){
+
+					double regionET =  regionPhysicalEt(*newRegion);
+					unsigned int regionEta = newRegion->gctEta(); 
+					unsigned int regionPhi = newRegion->gctPhi(); 
+					//double neighborET =-999;
+					double neighborET =0;
+					for(L1CaloRegionCollection::const_iterator neighbor = newRegions->begin(); neighbor != newRegions->end(); neighbor++)
+					{       
+						double tmpET = regionPhysicalEt(*neighbor);
+						if (deltaGctPhi(*newRegion, *neighbor) == 1 && (newRegion->gctEta() == neighbor->gctEta()))
+						{neighborET += tmpET;}
+						else if (deltaGctPhi(*newRegion, *neighbor) ==-1 && (newRegion->gctEta() == neighbor->gctEta()))
+						{neighborET += tmpET;}
+						else if (deltaGctPhi(*newRegion, *neighbor) ==0 && (newRegion->gctEta() - neighbor->gctEta()) == 1)
+						{neighborET += tmpET;}
+						else if (deltaGctPhi(*newRegion, *neighbor) == 0 && (neighbor->gctEta() - newRegion->gctEta()) == 1)
+						{neighborET += tmpET;}
+					}                                      
+
+					tauPt_.push_back(regionET+neighborET);
+					tauEta_.push_back(regionEta);
+					tauPhi_.push_back(regionPhi);
+				}//end matched region
+			}//end for region loop 
+
+			tree->Fill();
+		}//end gen tau loop
+	}//end genparticle loop
 
 
-	for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin(); newRegion != newRegions->end(); newRegion++)
-	{
-		double regionET =  regionPhysicalEt(*newRegion);
-		unsigned int regionEta = newRegion->gctEta(); 
-		unsigned int regionPhi = newRegion->gctPhi(); 
 
-		regionPt_.push_back(regionET);
-		regionEta_.push_back(regionEta);
-		regionPhi_.push_back(regionPhi);
+	//cout<< "====Make Sums===="<<std::endl;
+	//makeSums();
+	//cout<< "====Push Back===="<<std::endl;
+	//cout<< "MET: "<<MET<<std::endl;
 
-		if (regionET > 0) {puMult0_++; }//this calculates pum0
-	} //end Pum0, pionPT
-
-	tree->Fill();
+	//cout<< "====Fill Tree===="<<std::endl;
+	//	tree->Fill();
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(pum0calculator);
+DEFINE_FWK_MODULE(taucalculator);

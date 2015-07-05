@@ -11,6 +11,7 @@
  * =====================================================================================
  */
 
+
 #ifndef HELPERS_W9QK6HND
 #define HELPERS_W9QK6HND
 
@@ -24,7 +25,10 @@ int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2);
 // Calo detector mapping.
 //
 // See: https://twiki.cern.ch/twiki/bin/view/CMS/RCTMap
-
+//Get the gctEta from the genEta.
+int convertGenEta(double genEta);
+//Get the gctPhi from the genPhi.
+int convertGenPhi(double genPhi);
 // Get the physical phi for a given TPG index.
 double convertTPGPhi(int iPhi);
 
@@ -44,4 +48,7 @@ double getRegionArea(int gctEta);
 int twrPhi2RegionPhi(int iPhi);
 int twrEta2RegionEta(int iEta);
 
+//GEnPArticle helpers
+std::vector<const reco::GenParticle*> getGenParticleCollection(const edm::Event& evt);	
+const reco::GenParticle* findBestGenMatch(const reco::PFTau& TagTauObj,std::vector<const reco::GenParticle*>& GenPart, double maxDR);
 #endif /* end of include guard: HELPERS_W9QK6HND */
