@@ -12,28 +12,9 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.RawToDigi_Data_cff import *
 
-
-# Modify the HCAL TPGs according to the proposed HTR modification.  If the HCAL
-# is above a given energy threshold, set the MIP bit.
-# HCAL TP hack
-
-from SimCalorimetry.HcalTrigPrimProducers.hcaltpdigi_cff import *
-simHcalTriggerPrimitiveDigis.inputLabel = cms.VInputTag(
-    cms.InputTag('hcalDigis'),
-    cms.InputTag('hcalDigis')
-)
-
-HcalTPGCoderULUT.LUTGenerationMode = cms.bool(True)
-
-L1TRerunHCALTP_FromRAW = cms.Sequence(
-    hcalDigis
-    * simHcalTriggerPrimitiveDigis
-)
-
 rctProd = cms.EDProducer(
     "L1RCTProducer",
-    hcalDigis = cms.VInputTag(cms.InputTag("simHcalTriggerPrimitiveDigis")),
-    #hcalDigis = cms.VInputTag(cms.InputTag("hcalDigis")),
+    hcalDigis = cms.VInputTag(cms.InputTag("hcalDigis")),
     useEcal = cms.bool(True),
     useHcal = cms.bool(True),
     ecalDigis = cms.VInputTag(cms.InputTag("ecalDigis:EcalTriggerPrimitives")),
@@ -50,11 +31,12 @@ digiStep = cms.Sequence(
     gctDigis
     * gtDigis
     * ecalDigis
+    * hcalDigis
 )
 
-uctEmulatorStep = cms.Sequence(
+emulatorStep = cms.Sequence(
     # Now make UCT and L1 objects
     rctProd
 )
 
-emulationSequence = cms.Sequence(L1TRerunHCALTP_FromRAW + digiStep + uctEmulatorStep)
+emulationSequence = cms.Sequence(digiStep + emulatorStep)

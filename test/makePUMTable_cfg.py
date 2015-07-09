@@ -52,7 +52,10 @@ process.TFileService = cms.Service(
 )
 
 # Load emulation and RECO sequences
-process.load("L1Trigger.PileUpTable.emulation_cfi")
+if options.isMC:
+   process.load("L1Trigger.PileUpTable.emulationMC_cfi")
+else: 
+   process.load("L1Trigger.PileUpTable.emulation_cfi")
 
 process.load("Configuration.Geometry.GeometryIdeal_cff")
 
