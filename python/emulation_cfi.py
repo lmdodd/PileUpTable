@@ -11,7 +11,6 @@ import FWCore.ParameterSet.Config as cms
 
 
 from Configuration.StandardSequences.RawToDigi_Data_cff import *
-#from L1Trigger.PileUpTable.Lut import *
 
 
 # Modify the HCAL TPGs according to the proposed HTR modification.  If the HCAL

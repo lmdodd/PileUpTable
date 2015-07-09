@@ -90,9 +90,7 @@ class pum0calculator : public edm::EDAnalyzer {
 		vector<double> cosPhi;
 
 		double regionLSB_;
-		// Add UCT-only variables
-		unsigned int minGctEtaForSums;
-		unsigned int maxGctEtaForSums;
+		bool isMC_;
 };
 
 
@@ -117,6 +115,7 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	vertexSrc_ = pset.exists("vertexSrc") ? pset.getParameter<InputTag>("vertexSrc") : InputTag("offlinePrimaryVertices");
 	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("addPileupInfo");
 	regionLSB_ = pset.getParameter<double>("regionLSB");
+	isMC_ = pset.getParameter<bool>("isMC");
 }
 
 
@@ -149,13 +148,14 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
         //53X
 	//npvs_ = vertices->size();
-	
+	if (isMC_){	
         for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
             int BX = PVI->getBunchCrossing();
             if (BX==0){
                npvs_ = PVI->getPU_NumInteractions();
 	     }
          }
+        }
 
 	if (lumiScalers->size())
 		instLumi_ = lumiScalers->begin()->instantLumi();
