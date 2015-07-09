@@ -135,7 +135,7 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	//edm::Handle<L1CaloRegionCollection>::const_iterator newRegion;
 
 	evt.getByLabel(scalerSrc_, lumiScalers);
-	evt.getByLabel("uctDigis", newRegions);
+	evt.getByLabel("rctProd", newRegions);
 	evt.getByLabel(pvSrc_, puInfo);
 	evt.getByLabel(vertexSrc_, vertices_r);
 

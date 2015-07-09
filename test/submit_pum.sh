@@ -9,8 +9,10 @@ fi
 
 farmoutAnalysisJobs $1 \
   --infer-cmssw-path \
-  --input-file-list=../submission/DY40bs25.txt  \
-  --input-files-per-job=1 \
+  --input-file-list=NeutrinoGun13_Flat2050_BX50.txt  \
+  --input-dir=root://cmsxrootd.fnal.gov/ \
+  --assume-input-files-exist \
+  --input-files-per-job=20 \
   makePUMTable_cfg.py isMC=1 \
     'inputFiles=$inputFileNames' 'outputFile=$outputFileName' 
 
