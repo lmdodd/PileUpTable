@@ -18,17 +18,7 @@ recordOverrides = {
 process.GlobalTag = GlobalTag(process.GlobalTag, '74X_dataRun2_Prompt_v1', recordOverrides)
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource', 'GlobalTag')
 
-process.load("SimCalorimetry.EcalTrigPrimProducers.ecalTriggerPrimitiveDigis_readDBOffline_cff")
-
-process.load("EventFilter.EcalRawToDigi.EcalUnpackerMapping_cfi")
-process.load("EventFilter.EcalRawToDigi.EcalUnpackerData_cfi")
-
-process.load("Geometry.EcalMapping.EcalMapping_cfi")
-process.load("Geometry.EcalMapping.EcalMappingRecord_cfi")
-
-process.load("Geometry.CaloEventSetup.CaloGeometry_cfi")
-process.load("Geometry.CaloEventSetup.EcalTrigTowerConstituents_cfi")
-process.load("Geometry.CMSCommonData.cmsIdealGeometryXML_cfi")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 
 from SimCalorimetry.EcalTrigPrimProducers.ecalTriggerPrimitiveDigis_cff import simEcalTriggerPrimitiveDigis
 process.ecalReEmulDigis = simEcalTriggerPrimitiveDigis.clone()
@@ -54,7 +44,7 @@ process.PUMtables = cms.Sequence( process.PUMcalcCentralBX )
 process.p = cms.Path(process.fixLaserCorrections*process.PUMtables)
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1)
+    input = cms.untracked.int32(options.maxEvents)
 )
 
 process.source = cms.Source("PoolSource",

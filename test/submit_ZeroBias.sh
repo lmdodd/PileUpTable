@@ -5,7 +5,7 @@ farmoutAnalysisJobs PUMcalc \
   --input-file-list=ZeroBias.txt \
   --input-dir=root://cmsxrootd.fnal.gov/ \
   --assume-input-files-exist \
-  --input-files-per-job=20 \
+  --input-files-per-job=10 \
   makePUMtable_Run2015B_ECalTPLaserCorrection.py \
     'inputFiles=$inputFileNames' 'outputFile=$outputFileName' 
 
@@ -14,6 +14,6 @@ farmoutAnalysisJobs PUMcalc \
   --input-file-list=ZeroBias.txt \
   --input-dir=root://cmsxrootd.fnal.gov/ \
   --assume-input-files-exist \
-  --input-files-per-job=20 \
+  --input-files-per-job=10 \
   makePUMtable_Run2015B_RCTFullEGTransparency.py \
     'inputFiles=$inputFileNames' 'outputFile=$outputFileName' 
