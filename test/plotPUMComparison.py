@@ -75,6 +75,8 @@ regionSubtraction_PU20_MC13TeV = [
         0.088608, 0.199431, 0.315091, 0.434705, 0.572647, 0.728147, 0.901087, 1.100828, 1.318835, 1.568081, 1.839141, 2.157059, 2.508234, 2.937361, 3.087302, 0.000000, 0.000000, 0.,
         0.111111, 0.103024, 0.169000, 0.268494, 0.380306, 0.512103, 0.664542, 0.835524, 1.027807, 1.242631, 1.484586, 1.748726, 2.050053, 2.398987, 2.804097, 2.888889, 0.000000, 0.000000]
 
+regionSubtraction_PU20_MC13TeV = [2*x for x in regionSubtraction_PU20_MC13TeV]
+
 ecallaserEtaRank = ROOT.TH2F('ecallaserEtaRank', 'ECal Recipe;RCT #eta;Region Rank;Counts', 22, -0.5, 21.5, 1024, -0.5, 1023.5)
 rctlaserEtaRank = ROOT.TH2F('rctlaserEtaRank', 'RCT Full Laser Correction;RCT #eta;Region Rank;Counts', 22, -0.5, 21.5, 1024, -0.5, 1023.5)
 
@@ -85,13 +87,15 @@ for ieta in range(22) :
     multi = ROOT.THStack('multiplot%02d' % ieta, ';PUM Bin;Average Region Rank')
 
     for plot in plots['regionsPUMEta%d' % ieta].values() :
-        prof = plot.ProfileX()
         if plot.GetTitle() == 'RCT Laser ZeroBias' :
             for i in range(1024) :
                 rctlaserEtaRank.SetBinContent(ieta, i, sum([plot.GetBinContent(pumbin, i) for pumbin in range(18)]))
         if plot.GetTitle() == 'ECal Laser ZeroBias' :
             for i in range(1024) :
                 ecallaserEtaRank.SetBinContent(ieta, i, sum([plot.GetBinContent(pumbin, i) for pumbin in range(18)]))
+
+        prof = plot.ProfileX()
+        if plot.GetTitle() == 'RCT Laser ZeroBias' :
             prevpum = 0.
             for pumbin in range(prof.GetNbinsX()) :
                 pumval = prof.GetBinContent(pumbin+1)
@@ -117,7 +121,7 @@ for ieta in range(22) :
     canvas.Print('plots/PUMavgRankEta%02d_PUM.pdf' % ieta)
     canvas.Print('plots/PUMavgRankEta%02d_PUM.root' % ieta)
 
-print 'regionSubtraction_DataDrivenPUM0vX = cms.vdouble(' + ', '.join(['%f' % v for v in pumVector]) + ')'
+print 'regionSubtraction_DataDrivenPUM0_RCTFullEG_v1 = cms.vdouble(' + ', '.join(['%f' % v for v in pumVector]) + ')'
 
 canvas = ROOT.TCanvas()
 canvas.SetLogz(True)
