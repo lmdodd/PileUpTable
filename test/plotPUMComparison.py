@@ -9,26 +9,18 @@ ROOT.gStyle.SetOptDate(0)
 attributes = ['LineColor', 'LineStyle', 'LineWidth', 'MarkerColor', 'MarkerStyle', 'MarkerSize']
 
 plotFolders = {
-        'pumtable_ecallaser.root' : {
-            'ECal Laser ZeroBias' : {
-                'folderName' : 'PUMcalcCentralBX',
-                'LineColor' : ROOT.kBlack,
-                'LineWidth' : 2,
-            },
-        },
-        'pumtable_rctlaser.root' : {
-            'RCT Laser ZeroBias' : {
+        'pumtable_run2015C.root' : {
+            'Run 2015C Express BX0' : {
                 'folderName' : 'PUMcalcCentralBX',
                 'LineColor' : ROOT.kGray,
+                'LineStyle' : ROOT.kDashed,
                 'LineWidth' : 2,
             },
-        },
-        'zerobias_run251883.root' : {
-            'No Correction ZeroBias' : {
-                'folderName' : 'DQMData/Run 251883/L1T/Run summary/L1TPUM/BX0',
-                'LineColor' : ROOT.kBlue,
+            'Run 2015C Express BX +/- 2' : {
+                'folderName' : 'PUMcalcSideBX',
+                'LineColor' : ROOT.kBlack,
                 'LineWidth' : 2,
-            },
+            }
         },
     }
 
@@ -77,9 +69,6 @@ regionSubtraction_PU20_MC13TeV = [
 
 regionSubtraction_PU20_MC13TeV = [2*x for x in regionSubtraction_PU20_MC13TeV]
 
-ecallaserEtaRank = ROOT.TH2F('ecallaserEtaRank', 'ECal Recipe;RCT #eta;Region Rank;Counts', 22, -0.5, 21.5, 1024, -0.5, 1023.5)
-rctlaserEtaRank = ROOT.TH2F('rctlaserEtaRank', 'RCT Full Laser Correction;RCT #eta;Region Rank;Counts', 22, -0.5, 21.5, 1024, -0.5, 1023.5)
-
 pumVector = []
 print '# eta pum_bin avg_rank'
 for ieta in range(22) :
@@ -87,15 +76,8 @@ for ieta in range(22) :
     multi = ROOT.THStack('multiplot%02d' % ieta, ';PUM Bin;Average Region Rank')
 
     for plot in plots['regionsPUMEta%d' % ieta].values() :
-        if plot.GetTitle() == 'RCT Laser ZeroBias' :
-            for i in range(1024) :
-                rctlaserEtaRank.SetBinContent(ieta, i, sum([plot.GetBinContent(pumbin, i) for pumbin in range(18)]))
-        if plot.GetTitle() == 'ECal Laser ZeroBias' :
-            for i in range(1024) :
-                ecallaserEtaRank.SetBinContent(ieta, i, sum([plot.GetBinContent(pumbin, i) for pumbin in range(18)]))
-
         prof = plot.ProfileX()
-        if plot.GetTitle() == 'RCT Laser ZeroBias' :
+        if plot.GetTitle() == 'Run 2015C Express BX +/- 2' :
             prevpum = 0.
             for pumbin in range(prof.GetNbinsX()) :
                 pumval = prof.GetBinContent(pumbin+1)
@@ -121,12 +103,5 @@ for ieta in range(22) :
     canvas.Print('plots/PUMavgRankEta%02d_PUM.pdf' % ieta)
     canvas.Print('plots/PUMavgRankEta%02d_PUM.root' % ieta)
 
-print 'regionSubtraction_DataDrivenPUM0_RCTFullEG_v1 = cms.vdouble(' + ', '.join(['%f' % v for v in pumVector]) + ')'
+print 'regionSubtraction_DataDrivenPUM0_Run2015C_v1 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
 
-canvas = ROOT.TCanvas()
-canvas.SetLogz(True)
-canvas.SetRightMargin(.16)
-ecallaserEtaRank.Draw('colz')
-canvas.Print('plots/ecalLaserEtaRank2D.pdf')
-rctlaserEtaRank.Draw('colz')
-canvas.Print('plots/rctLaserEtaRank2D.pdf')
