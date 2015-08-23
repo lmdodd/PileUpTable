@@ -20,6 +20,8 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+#include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
@@ -37,6 +39,8 @@ class PUMcorrelation : public edm::EDAnalyzer {
     edm::EDGetTokenT<LumiScalersCollection> lumiScalerSource_;
     edm::EDGetTokenT<reco::VertexCollection> vertexSource_;
 
+    StringCutObjectSelector<reco::Vertex, true> vertexCut_;
+
     // For when using CTP7
     bool checkFEDInLumis_;
     int FEDIdToCheck_;
@@ -47,6 +51,7 @@ class PUMcorrelation : public edm::EDAnalyzer {
     int lumi_;
     int event_;
     int npvs_;
+    int npvsCut_;
     float instlumi_;
     float fixedGridRhoAll_;
     float fixedGridRhoFastjetAllCalo_;
@@ -61,6 +66,7 @@ PUMcorrelation::PUMcorrelation(const edm::ParameterSet& pset) :
   regionSource_(consumes<L1CaloRegionCollection>(pset.getParameter<edm::InputTag>("regionSource"))),
   lumiScalerSource_(consumes<LumiScalersCollection>(pset.getParameter<edm::InputTag>("lumiScalerSource"))),
   vertexSource_(consumes<reco::VertexCollection>(pset.getParameter<edm::InputTag>("vertexSource"))),
+  vertexCut_(pset.getParameter<std::string>("vertexCut")),
   checkFEDInLumis_(pset.getUntrackedParameter<bool>("checkFEDInLumis", false)),
   FEDIdToCheck_(pset.getUntrackedParameter<int>("FEDIdToCheck", 1350))
 {
@@ -71,6 +77,7 @@ PUMcorrelation::PUMcorrelation(const edm::ParameterSet& pset) :
 	tree_->Branch("lumi", &lumi_, "lumi/i");
 	tree_->Branch("event", &event_, "event/l");
 	tree_->Branch("npvs", &npvs_, "npvs/i");
+	tree_->Branch("npvsCut", &npvsCut_, "npvsCut/i");
 	tree_->Branch("instlumi", &instlumi_, "instlumi/F");
   tree_->Branch("fixedGridRhoAll", &fixedGridRhoAll_, "fixedGridRhoAll/F");
   tree_->Branch("fixedGridRhoFastjetAllCalo", &fixedGridRhoFastjetAllCalo_, "fixedGridRhoFastjetAllCalo/F");
@@ -90,6 +97,12 @@ void PUMcorrelation::analyze(const edm::Event& event, const edm::EventSetup& es)
   edm::Handle<reco::VertexCollection> vertexCollection;
   event.getByToken(vertexSource_, vertexCollection);
   npvs_ = vertexCollection->size();
+  npvsCut_ = 0;
+  for ( auto& vertex : *vertexCollection ) {
+    if ( vertexCut_(vertex) ) {
+      npvsCut_++;
+    }
+  }
 
   edm::Handle<LumiScalersCollection> lumiScalerCollection;
   event.getByToken(lumiScalerSource_, lumiScalerCollection);

@@ -103,5 +103,5 @@ for ieta in range(22) :
     canvas.Print('plots/PUMavgRankEta%02d_PUM.pdf' % ieta)
     canvas.Print('plots/PUMavgRankEta%02d_PUM.root' % ieta)
 
-print 'regionSubtraction_DataDrivenPUM0_Run2015C_v1 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
+print 'regionSubtraction_DataDrivenPUM0_Run2015C_v2 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
 
