@@ -48,6 +48,8 @@ class PUMcalc : public edm::EDAnalyzer {
     edm::EDGetTokenT<L1CaloRegionCollection> regionSource_;
     std::vector<int> bunchCrossingsToUse_;
     std::vector<TH2F*> regionsPUMEta_;
+    TH2F* regionBxPopulation_;
+    TH2F* regionBxEtSum_;
     bool checkFEDInLumis_;
     int FEDIdToCheck_;
 
@@ -68,6 +70,9 @@ PUMcalc::PUMcalc(const edm::ParameterSet& pset) :
   for (size_t ieta=0; ieta<PUMETABINS; ++ieta) {
     regionsPUMEta_[ieta] = fs->make<TH2F>(("regionsPUMEta"+std::to_string(ieta)).c_str(), "PUM Bin rank distribution;PU bin;Rank", PUMBINS, PUMMIN, PUMMAX, R10BINS, R10MIN, R10MAX);
   }
+
+  regionBxPopulation_ = fs->make<TH2F>("regionBxPopulation", "Event counts per region per bunch crossing;Region index (18*eta+phi);BX index;Counts", 396, -0.5, 395.5, 5, -2.5, 2.5);
+  regionBxEtSum_ = fs->make<TH2F>("regionBxEtSum", "Et per region per bunch crossing;Region index (18*eta+phi);BX index;Counts*et", 396, -0.5, 395.5, 5, -2.5, 2.5);
 }
 
 
@@ -85,6 +90,9 @@ void PUMcalc::analyze(const edm::Event& event, const edm::EventSetup& es)
       assert( std::abs(region.bx()) < 3 );
       nonzeroRegionsBX[region.bx()+2]++;
     }
+    size_t etaBin = region.gctEta();
+    regionBxPopulation_->Fill(etaBin*18+region.gctPhi(), region.bx());
+    regionBxEtSum_->Fill(etaBin*18+region.gctPhi(), region.bx(), region.et());
   }
  
   for ( auto bx : bunchCrossingsToUse_ ) {
