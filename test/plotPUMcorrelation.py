@@ -4,6 +4,7 @@ import glob
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptDate(0)
+ROOT.dotrootImport('nsmith-/CMSPlotDecorations')
 
 tree = ROOT.TChain('PUMcorrelation/Ntuple')
 #for f in glob.glob('/hdfs/store/user/ncsmith/PUMstudy-PUMcorrelation_Run2015B_ECalTPLaserCorrection/*.root') :
@@ -28,17 +29,22 @@ canvas.SetRightMargin(.16)
 canvas.SetLogz(True)
 
 nonzeroVsRho.Draw('colz')
+ROOT.CMSlumi(canvas, iPeriod=0, lumiText='Run 254790 (13TeV)')
 canvas.Print('plots/nonzeroRegionsVsRho.pdf')
 canvas.Print('plots/nonzeroRegionsVsRho.root')
 
 nonzeroVsCaloRho.Draw('colz')
+ROOT.CMSlumi(canvas, iPeriod=0, lumiText='Run 254790 (13TeV)')
 canvas.Print('plots/nonzeroRegionsVsCaloRho.pdf')
 canvas.Print('plots/nonzeroRegionsVsCaloRho.root')
 
 nonzeroVsPV.Draw('colz')
+ROOT.CMSlumi(canvas, iPeriod=0, lumiText='Run 254790 (13TeV)')
 canvas.Print('plots/nonzeroRegionsVsPV.pdf')
 canvas.Print('plots/nonzeroRegionsVsPV.root')
 
+canvas.SetLogz(False)
 nonzeroVsSelectedPV.Draw('colz')
+ROOT.CMSlumi(canvas, iPeriod=0, lumiText='Run 254790 (13TeV)')
 canvas.Print('plots/nonzeroRegionsVsSelectedPV.pdf')
 canvas.Print('plots/nonzeroRegionsVsSelectedPV.root')
