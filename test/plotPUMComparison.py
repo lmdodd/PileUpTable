@@ -22,6 +22,27 @@ plotFolders = {
                 'LineWidth' : 2,
             }
         },
+        'neutrinoGunPhys14.root' : {
+            'MC Phys14 (V4 RCT scales)' : {
+                'folderName' : 'PUMcalc',
+                'LineColor' : ROOT.kGreen,
+                'LineWidth' : 2,
+            }
+        },
+        'neutrinoGunSpring15Flat.root' : {
+            'MC Spring15 Flat PU (V4 RCT scales)' : {
+                'folderName' : 'PUMcalc',
+                'LineColor' : ROOT.kBlue,
+                'LineWidth' : 2,
+            }
+        },
+        'neutrinoGunHF.root' : {
+            'MC w/HF corrections (V4 RCT scales)' : {
+                'folderName' : 'PUMcalc',
+                'LineColor' : ROOT.kRed,
+                'LineWidth' : 2,
+            }
+        },
     }
 
 plots = {}
