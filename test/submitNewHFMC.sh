@@ -26,8 +26,8 @@ farmoutAnalysisJobs $(echo ${cachefile}|sed 's:.txt::') \
   --input-file-list=${cachefile} \
   --input-dir=root://cmsxrootd.fnal.gov/ \
   --assume-input-files-exist \
-  --input-files-per-job=5 \
-  --job-count=100 \
+  --input-files-per-job=4 \
+  --job-count=250 \
   makePUMtable_MC.py \
     'inputFiles=$inputFileNames' 'outputFile=$outputFileName' "globalTag=${globalTag}"
 

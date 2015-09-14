@@ -131,7 +131,7 @@ for ieta in range(22) :
     profiles = []
     for plot in plots['regionsPUMEta%d' % ieta].values() :
         prof = plot.ProfileX("_pfx", 1, -1, "i")
-        if plot.GetTitle() == 'Run 2015C Express BX +/- 2' :
+        if plot.GetTitle() == 'MC w/HF corrections (V4 RCT scales)' :
             prevpum = 0.
             for pumbin in range(prof.GetNbinsX()) :
                 pumval = prof.GetBinContent(pumbin+1)
@@ -163,7 +163,6 @@ for ieta in range(22) :
     mcTable.SetFillColorAlpha(ROOT.kOrange-3, 0.9)
     mcTable.SetLineColorAlpha(ROOT.kWhite, 0.)
     for pumbin in range(18) :
-        #mcTable.SetBinContent(pumbin, regionSubtraction_PU40_MC13TeV[18*ieta+pumbin])
         mcTable.SetBinContent(pumbin+1, regionSubtraction_PU40_rankInts[18*ieta+pumbin])
         mcTable.SetBinError(pumbin+1, 0.5)
     multi.Add(mcTable, 'E2')
@@ -179,5 +178,5 @@ for ieta in range(22) :
     canvas.Print('plots/PUMavgRankEta%02d_PUM.pdf' % ieta)
     canvas.Print('plots/PUMavgRankEta%02d_PUM.root' % ieta)
 
-print 'regionSubtraction_DataDrivenPUM0_Run2015C_v3 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
+print 'regionSubtraction_MCHFscale_v1 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
 

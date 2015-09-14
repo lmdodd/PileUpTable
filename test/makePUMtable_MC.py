@@ -52,7 +52,7 @@ process.PUMcalc = cms.EDAnalyzer("PUMcalc",
 
 process.PUMtables = cms.Sequence( process.PUMcalc )
 
-process.p = cms.Path(process.gctDigis*process.PUMtables)
+process.p = cms.Path((process.ecalDigis+process.hcalSequence)*process.rctReEmulDigis*process.PUMtables)
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(options.maxEvents)
