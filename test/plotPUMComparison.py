@@ -9,14 +9,14 @@ ROOT.gStyle.SetOptDate(0)
 attributes = ['LineColor', 'LineStyle', 'LineWidth', 'MarkerColor', 'MarkerStyle', 'MarkerSize']
 
 plotFolders = {
-        'pumtable_run2015C.root' : {
-            'Run 2015C Express BX0' : {
+        'Express2015D_sep17.root' : {
+            'Run 2015D Express BX0' : {
                 'folderName' : 'PUMcalcCentralBX',
                 'LineColor' : ROOT.kGray,
                 'LineStyle' : ROOT.kDashed,
                 'LineWidth' : 2,
             },
-            'Run 2015C Express BX +/- 2' : {
+            'Run 2015D Express BX +/- 2' : {
                 'folderName' : 'PUMcalcSideBX',
                 'LineColor' : ROOT.kBlack,
                 'LineWidth' : 2,
@@ -137,21 +137,28 @@ for ieta in range(22) :
     multi = ROOT.THStack('multiplot%02d' % ieta, ';PUM Bin;Average Region Rank')
 
     profiles = []
+    tablePlot = None
     for plot in plots['regionsPUMEta%d' % ieta].values() :
         prof = plot.ProfileX("_pfx", 1, -1, "i")
-        if plot.GetTitle() == 'MC w/HF corrections (V4 RCT scales)' :
-            prevpum = 0.
-            for pumbin in range(prof.GetNbinsX()) :
-                pumval = prof.GetBinContent(pumbin+1)
-                if pumval == 0. :
-                    pumval = prevpum
-                print '%d %d %f' % (ieta, pumbin, round(pumval))
-                pumVector.append(round(pumval)/2.)
-                prevpum = pumval
         for attr in attributes :
             getattr(prof, 'Set'+attr)(getattr(plot, 'Get'+attr)())
         multi.Add(prof, 'ep')
         profiles.append(prof)
+        if '2015D' in plot.GetTitle() :
+            if tablePlot :
+                tablePlot.Add(plot)
+            else :
+                tablePlot = plot.Clone('tableplot')
+
+    tableProf = tablePlot.ProfileX("_pfx", 1, -1, "i")
+    prevpum = 0.
+    for pumbin in range(tableProf.GetNbinsX()) :
+        pumval = tableProf.GetBinContent(pumbin+1)
+        if pumval == 0. :
+            pumval = prevpum
+        print '%d %d %f' % (ieta, pumbin, round(pumval))
+        pumVector.append(round(pumval)/2.)
+        prevpum = pumval
 
     newTable = ROOT.TH1F('newTable%d' % ieta, 'Proposed new table', 18, -0.5, 17.5)
     newTable.SetMarkerStyle(ROOT.kStar)
@@ -186,5 +193,5 @@ for ieta in range(22) :
     canvas.Print('plots/PUMavgRankEta%02d_PUM.pdf' % ieta)
     canvas.Print('plots/PUMavgRankEta%02d_PUM.root' % ieta)
 
-print 'regionSubtraction_MCHFscale_v1 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
+print 'regionSubtraction_DataDrivenPUM0_Run2015D_v1 = cms.vdouble([' + ', '.join(['%f' % v for v in pumVector]) + '])'
 

@@ -12,4 +12,4 @@ farmoutAnalysisJobs $(echo ${cachefile}|sed 's:.txt::') \
     'inputFiles=$inputFileNames' 'outputFile=$outputFileName'
 
 # hadd -f Express2015D_sep17.root /hdfs/store/user/ncsmith/Express2015D_sep17-makePUMtable_MC/*.root
-# find /data/ncsmith/Express2015D_sep17-makePUMtable_MC/ -name *.err -size +0 -exec grep -l 'gsiftp' '{}' \; |xargs sed -n 's:.*Events total = \([0-9]*\) passed.*:\1:p' |awk '{s+=$1} END {print s}'
+# find /data/ncsmith/Express2015D_sep17-makePUMtable_MC/ -name *.err -size +0 -exec grep -l 'gsiftp' '{}' \; |xargs sed -n 's:.*Events total = \([0-9]*\) passed = \([0-9]*\).*:\2:p' |awk '{s+=$1} END {print s}'

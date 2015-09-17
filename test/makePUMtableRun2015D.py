@@ -64,8 +64,12 @@ process.source = cms.Source("PoolSource",
         ),
 )
 
+Express2015D_sep17 = {
+  "256675": [[1, 106], [109, 164]],
+  "256676": [[7, 160], [162, 208], [213, 417], [430, 470], [473, 509], [511, 735], [738, 798], [811, 854], [856, 1086]]
+}
 import FWCore.PythonUtilities.LumiList as LumiList
-process.source.lumisToProcess = LumiList.LumiList(filename = 'run2015DExpress_Sep17.json').getVLuminosityBlockRange()
+process.source.lumisToProcess = LumiList.LumiList(compactList = Express2015D_sep17).getVLuminosityBlockRange()
 
 
 process.TFileService = cms.Service(
