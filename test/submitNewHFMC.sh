@@ -1,7 +1,11 @@
 # source me
 
-dataset='/SingleNeutrino/RunIISpring15DR74-NhcalZSHFscaleFlat10to30Asympt25ns_MCRUN2_74_V9-v1/GEN-SIM-RAW'
-cachefile=neutrinoGunHF.txt
+#dataset='/SingleNeutrino/RunIISpring15DR74-NhcalZSHFscaleFlat10to30Asympt25ns_MCRUN2_74_V9-v1/GEN-SIM-RAW'
+#cachefile=neutrinoGunHF.txt
+#globalTag=MCRUN2_74_V9
+
+dataset='/QCD_Pt-15to3000_TuneCUETP8M1_Flat_13TeV_pythia8/RunIISpring15DR74-NhcalZSHFscaleFlat10to30Asympt25ns_MCRUN2_74_V9-v1/GEN-SIM-RAW'
+cachefile=QCDHF.txt
 globalTag=MCRUN2_74_V9
 
 #dataset='/SingleNeutrino/RunIISpring15DR74-Asympt25nsRaw_MCRUN2_74_V9-v2/GEN-SIM-RAW'

@@ -36,6 +36,14 @@ plotFolders = {
                 'LineWidth' : 2,
             }
         },
+        'QCDHF.root' : {
+            'QCD MC w/HF corrections' : {
+                'folderName' : 'PUMcalc',
+                'LineColor' : ROOT.kRed,
+                'LineStyle' : ROOT.kDashed,
+                'LineWidth' : 2,
+            }
+        },
         'neutrinoGunHF.root' : {
             'MC w/HF corrections (V4 RCT scales)' : {
                 'folderName' : 'PUMcalc',
