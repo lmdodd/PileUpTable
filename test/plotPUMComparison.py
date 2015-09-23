@@ -130,6 +130,7 @@ regionSubtraction_PU20_MC13TeV = [2*x for x in regionSubtraction_PU20_MC13TeV]
 regionSubtraction_PU40_MC13TeV = [2*x for x in regionSubtraction_PU40_MC13TeV]
 regionSubtraction_DataDrivenPUM0_Run2015C_v3  = [2*x for x in regionSubtraction_DataDrivenPUM0_Run2015C_v3 ]
 
+
 pumVector = []
 print '# eta pum_bin avg_rank'
 for ieta in range(22) :
@@ -156,7 +157,7 @@ for ieta in range(22) :
         pumval = tableProf.GetBinContent(pumbin+1)
         if pumval == 0. :
             pumval = prevpum
-        print '%d %d %f' % (ieta, pumbin, round(pumval))
+        print '%d %f' % (ieta*18+pumbin, int(round(pumval)))
         pumVector.append(round(pumval)/2.)
         prevpum = pumval
 
