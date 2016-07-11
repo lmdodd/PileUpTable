@@ -101,7 +101,7 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	tree = fs->make<TTree>("Ntuple", "Ntuple");
 	tree->Branch("regionPt", "std::vector<float>", &regionPt_);
 	tree->Branch("regionEta", "std::vector<int>", &regionEta_);
-	tree->Branch("regionPhi", "std::vector<float>", &regionPhi_);
+	tree->Branch("regionPhi", "std::vector<int>", &regionPhi_);
 	tree->Branch("run", &run_, "run/i");
 	tree->Branch("lumi", &lumi_, "lumi/i");
 	tree->Branch("evt", &event_, "evt/l");
@@ -134,8 +134,7 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	//edm::Handle<L1CaloRegionCollection>::const_iterator newRegion;
 
 	evt.getByLabel(scalerSrc_, lumiScalers);
-	evt.getByLabel("rctProd", newRegions);
-	evt.getByLabel(pvSrc_, puInfo);
+	evt.getByLabel("rctDigis", newRegions);
 	evt.getByLabel(vertexSrc_, vertices_r);
 
 	regionEta_.clear();
@@ -147,8 +146,9 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	puMult0_ = 0;
 
         //53X
-	//npvs_ = vertices->size();
+	npvs_ = vertices_r->size();
 	if (isMC_){	
+    evt.getByLabel(pvSrc_, puInfo);
         for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
             int BX = PVI->getBunchCrossing();
             if (BX==0){

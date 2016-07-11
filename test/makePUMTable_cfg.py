@@ -31,7 +31,7 @@ if options.isMC==1:
    process.GlobalTag.globaltag = 'MCRUN2_74_V8'
    print ' Using Global Tag for Monte Carlo: %s' % process.GlobalTag.globaltag
 else:
-   process.GlobalTag.globaltag = 'GR_P_V56'
+   process.GlobalTag.globaltag = '74X_dataRun2_Prompt_v1'
    print ' Using Global Tag for Prompt Reconstructed Data: %s' % process.GlobalTag.globaltag
 
 
@@ -78,19 +78,17 @@ else:
    process.tree = cms.EDAnalyzer(
       "pum0calculator",
       regionLSB = cms.double(0.5),#RCTConfigProducers.jetMETLSB
-      isMC = cms.bool(False)
+      isMC = cms.bool(False),
+      vertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices")
    )
 
 
 
 
 process.p1 = cms.Path(
-    process.emulationSequence *
-    process.scalersRawToDigi
+    process.tree
 )
 
-
-process.p1 += process.tree
 
 # Make the framework shut up.
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
