@@ -10,6 +10,7 @@
  *
  * =====================================================================================
  */
+#include <stdint.h>
 #include "L1Trigger/PileUpTable/interface/helpers.h"
 #include <memory>
 #include <math.h>
@@ -165,7 +166,8 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin(); newRegion != newRegions->end(); newRegion++)
 	{
 		double regionET =  regionPhysicalEt(*newRegion);
-		unsigned int regionEta = newRegion->gctEta(); 
+		unsigned int regionEta = getRegionNumber(newRegion->gctEta()); 
+		if(isNegativeEtaSide(newRegion->gctEta())) regionEta = -regionEta;
 		unsigned int regionPhi = newRegion->gctPhi(); 
 
 		regionPt_.push_back(regionET);
