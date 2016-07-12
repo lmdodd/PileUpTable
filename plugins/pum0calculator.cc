@@ -10,6 +10,7 @@
  *
  * =====================================================================================
  */
+#include <stdint.h>
 #include "L1Trigger/PileUpTable/interface/helpers.h"
 #include <memory>
 #include <math.h>
@@ -71,6 +72,7 @@ class pum0calculator : public edm::EDAnalyzer {
 		InputTag uctDigis_;
 		InputTag pvSrc_;
 		InputTag vertexSrc_;
+		InputTag regionSrc_;
 		InputTag genSrc_;
 
 		float instLumi_;
@@ -84,7 +86,7 @@ class pum0calculator : public edm::EDAnalyzer {
 
 		vector<float> regionPt_;
 		vector<int> regionEta_;
-		vector<float> regionPhi_;
+		vector<int> regionPhi_;
 
 		vector<double> sinPhi;
 		vector<double> cosPhi;
@@ -113,6 +115,7 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	//emulation variables
 	//53x
 	vertexSrc_ = pset.exists("vertexSrc") ? pset.getParameter<InputTag>("vertexSrc") : InputTag("offlinePrimaryVertices");
+	regionSrc_ = pset.exists("regionSrc") ? pset.getParameter<InputTag>("regionSrc") : InputTag("simCaloStage2Layer1Digis");
 	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("addPileupInfo");
 	regionLSB_ = pset.getParameter<double>("regionLSB");
 	isMC_ = pset.getParameter<bool>("isMC");
@@ -134,7 +137,7 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	//edm::Handle<L1CaloRegionCollection>::const_iterator newRegion;
 
 	evt.getByLabel(scalerSrc_, lumiScalers);
-	evt.getByLabel("rctDigis", newRegions);
+	evt.getByLabel(regionSrc_, newRegions);
 	evt.getByLabel(vertexSrc_, vertices_r);
 
 	regionEta_.clear();
@@ -165,8 +168,9 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	for(L1CaloRegionCollection::const_iterator newRegion = newRegions->begin(); newRegion != newRegions->end(); newRegion++)
 	{
 		double regionET =  regionPhysicalEt(*newRegion);
-		unsigned int regionEta = newRegion->gctEta(); 
-		unsigned int regionPhi = newRegion->gctPhi(); 
+		int regionEta = getRegionNumber(newRegion->gctEta()); 
+		if(isNegativeEtaSide(newRegion->gctEta())) regionEta = -regionEta;
+		int regionPhi = newRegion->gctPhi(); 
 
 		regionPt_.push_back(regionET);
 		regionEta_.push_back(regionEta);

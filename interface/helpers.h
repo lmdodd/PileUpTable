@@ -11,6 +11,8 @@
  * =====================================================================================
  */
 
+#include <stdint.h>
+
 #ifndef HELPERS_W9QK6HND
 #define HELPERS_W9QK6HND
 
@@ -19,29 +21,23 @@ class L1CaloRegion;
 // Compute the difference in phi between two towers, wrapping at phi = N
 int deltaPhiWrapAtN(unsigned int N, int phi1, int phi2);
 
-int deltaGctPhi(const L1CaloRegion& r1, const L1CaloRegion& r2);
-
-// Calo detector mapping.
-//
-// See: https://twiki.cern.ch/twiki/bin/view/CMS/RCTMap
-
-// Get the physical phi for a given TPG index.
-double convertTPGPhi(int iPhi);
-
-// Get the physical eta for a given TPG index
-double convertTPGEta(int iEta);
+int deltaPhi(const L1CaloRegion& r1, const L1CaloRegion& r2);
 
 // Convert a region index into physical phi (at center of region)
 double convertRegionPhi(int iPhi);
 
 // Convert a region index into physical eta (at center of region)
-double convertRegionEta(int iEta);
+double convertRegionEta(uint32_t regionNumber);
 
 // Get the effective area of a region in a given eta slice.
-double getRegionArea(int gctEta);
+double getRegionArea(uint32_t regionNumber);
 
-// Find GCT index of a given tower.
-int twrPhi2RegionPhi(int iPhi);
-int twrEta2RegionEta(int iEta);
+// Get region number
+
+uint32_t getRegionNumber(uint32_t gctEta);
+
+// Get eta sign
+
+bool isNegativeEtaSide(uint32_t gctEta);
 
 #endif /* end of include guard: HELPERS_W9QK6HND */
