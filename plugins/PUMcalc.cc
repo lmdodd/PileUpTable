@@ -23,14 +23,16 @@
 #include "TTree.h"
 #include "TH2F.h"
 
+#include "L1Trigger/PileUpTable/interface/helpers.h"
+
 // TODO: move to configuration?
 namespace {
   const unsigned int R10BINS = 1024;
   const float R10MIN = -0.5;
   const float R10MAX = 1023.5;
 
-  const unsigned int PUMETABINS = 22;
-  const unsigned int PUMNORMALIZE = 22;
+  const unsigned int PUMETABINS = 26;
+  const unsigned int PUMNORMALIZE = 26;
 
   const unsigned int PUMBINS = 18;
   const float PUMMIN = -0.5;
@@ -90,17 +92,25 @@ void PUMcalc::analyze(const edm::Event& event, const edm::EventSetup& es)
       assert( std::abs(region.bx()) < 3 );
       nonzeroRegionsBX[region.bx()+2]++;
     }
-    size_t etaBin = region.gctEta();
-    regionBxPopulation_->Fill(etaBin*18+region.gctPhi(), region.bx());
-    regionBxEtSum_->Fill(etaBin*18+region.gctPhi(), region.bx(), region.et());
+    size_t etaBin = 0xDEADBEEF;
+    if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (PUMETABINS / 2);
+    else etaBin = getRegionNumber(region.gctEta());
+    if(etaBin < PUMETABINS) {
+      regionBxPopulation_->Fill(etaBin*18+region.gctPhi(), region.bx());
+      regionBxEtSum_->Fill(etaBin*18+region.gctPhi(), region.bx(), region.et());
+    }
   }
  
   for ( auto bx : bunchCrossingsToUse_ ) {
     for (const auto& region : *regionCollection) {
-      size_t etaBin = region.gctEta();
-      if ( region.bx() == bx ) {
-        assert( std::abs(bx) < 3 );
-        regionsPUMEta_[etaBin]->Fill(nonzeroRegionsBX[bx+2]/PUMNORMALIZE, region.et());
+      size_t etaBin = 0xDEADBEEF;
+      if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (PUMETABINS / 2);
+      else etaBin = getRegionNumber(region.gctEta());
+      if(etaBin < PUMETABINS) {
+	if ( region.bx() == bx ) {
+	  assert( std::abs(bx) < 3 );
+	  regionsPUMEta_[etaBin]->Fill(nonzeroRegionsBX[bx+2]/PUMNORMALIZE, region.et());
+	}
       }
     }
   }
