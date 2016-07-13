@@ -33,6 +33,6 @@ This generates a file in the /data/USER/UCTPUMTable-runNumber-pumbins.root area 
 ```
 cd L1Trigger/PileUpTable/test/
 #python table.py [pumbins] [runrunmber]
-python table 18 275832 #produces plots and table (see "PUMLut-18.txt") and plots comparing to 2015 40PU MC (directory plots18/)
-python table 39 275832 #produces plots and table (see "PUMLut-39.txt") and plots (directory plots39/ ) 
+python table.py 18 275832 #produces plots and table (see "PUMLut-18.txt") and plots comparing to 2015 40PU MC (directory plots18/)
+python table.py 39 275832 #produces plots and table (see "PUMLut-39.txt") and plots (directory plots39/ ) 
 ```
