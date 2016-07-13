@@ -31,7 +31,7 @@ attributes = ['LineColor', 'LineStyle', 'LineWidth', 'MarkerColor', 'MarkerStyle
 
 
 plotFolders = {
-        '/data/ldodd/UCTPUMTable-'+RunNumber+'-'+pumbinStr+'.root' : {
+        '/data/'+os.environ['USER']+'/UCTPUMTable-'+RunNumber+'-'+pumbinStr+'.root' : {
             'Run 2016C ZeroBias BX0' : {
                 'folderName' : 'PUMcalcCentralBX',
                 'LineColor' : ROOT.kPink-3,
