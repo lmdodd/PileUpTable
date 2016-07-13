@@ -24,8 +24,8 @@ def runs(lumiJSONFile) :
         for runstring in jdict.keys() :
             yield int(runstring)
 
-jsonFile = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.txt'
-dataset = '/ZeroBias/Run2015B-v1/RAW'
+jsonFile = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/Cert_271036-276097_13TeV_PromptReco_Collisions16_JSON_NoL1T_v2.txt'
+dataset = '/ZeroBias/Run2016C-v2/RAW'
 
 # Not sure when to use these, they appear to not have any events in golden json
 #    '/ZeroBias1/Run2015B-v1/RAW',
