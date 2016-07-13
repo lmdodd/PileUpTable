@@ -33,7 +33,7 @@ if len(inputFiles) is 0 :
     raise Exception('No files found for dataset %s run %d' % (options.dataStream, options.runNumber))
 print 'Ok, time to analyze'
 
-process = cms.Process("makeUCTPUMTable", eras.Run2_2016)
+process = cms.Process("makeUCTPUMTuple", eras.Run2_2016)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -90,21 +90,18 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(inputFiles)
 )
 
-outputFile = '/data/' + os.environ['USER'] + '/UCTPUMTable-' + str(options.runNumber) + '.root'
+outputFile = '/data/' + os.environ['USER'] + '/UCTPUMTuple-' + str(options.runNumber) + '.root'
 
-process.PUMcalcCentralBX = cms.EDAnalyzer("PUMcalc",
-    regionSource = cms.InputTag("simCaloStage2Layer1Digis"),
+process.makeUCTPUMTuple = cms.EDAnalyzer(
+    "pum0calculator",
     regionLSB = cms.double(0.5),
-    bunchCrossingsToUse = cms.vint32(0)
-)
-
-process.PUMcorrelation = cms.EDAnalyzer("PUMcorrelation",
-    regionSource = cms.InputTag("simCaloStage2Layer1Digis"),
-    vertexSource = cms.InputTag("offlineSlimmedPrimaryVertices"),
-    vertexCut = cms.string("ndof > 4 && abs(z) <= 50. && abs(position.rho) <= 2"),
-    bunchCrossingsToUse = cms.vint32(0)
-)
+    isMC = cms.bool(False),
+    regionSrc = cms.InputTag("simCaloStage2Layer1Digis"),
+    scalerSrc = cms.InputTag("scalersRawToDigi"),
+    vertexSrc = cms.InputTag("offlineSlimmedPrimaryVertices"),
+    puSrc = cms.InputTag("-- Not Applicable For MC --")
+    )
 
 process.TFileService = cms.Service("TFileService", fileName = cms.string(outputFile))
 
-process.p = cms.Path(process.l1tCaloLayer1Digis*process.simCaloStage2Layer1Digis*process.PUMcalcCentralBX*process.PUMcorrelation)
+process.p = cms.Path(process.l1tCaloLayer1Digis*process.simCaloStage2Layer1Digis*process.makeUCTPUMTuple)
