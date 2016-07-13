@@ -57,6 +57,7 @@ class PUMcalc : public edm::EDAnalyzer {
 
 
     bool lumiIsValid_{false};
+    double regionLSB_;
 };
 
 
@@ -64,7 +65,8 @@ PUMcalc::PUMcalc(const edm::ParameterSet& pset) :
   regionSource_(consumes<L1CaloRegionCollection>(pset.getParameter<edm::InputTag>("regionSource"))),
   bunchCrossingsToUse_(pset.getParameter<std::vector<int>>("bunchCrossingsToUse")),
   checkFEDInLumis_(pset.getUntrackedParameter<bool>("checkFEDInLumis", false)),
-  FEDIdToCheck_(pset.getUntrackedParameter<int>("FEDIdToCheck", 1350))
+  FEDIdToCheck_(pset.getUntrackedParameter<int>("FEDIdToCheck", 1350)),
+  regionLSB_(pset.getParameter<double>("regionLSB"))
 {
   edm::Service<TFileService> fs;
 
@@ -109,7 +111,8 @@ void PUMcalc::analyze(const edm::Event& event, const edm::EventSetup& es)
       if(etaBin < PUMETABINS) {
 	if ( region.bx() == bx ) {
 	  assert( std::abs(bx) < 3 );
-	  regionsPUMEta_[etaBin]->Fill(nonzeroRegionsBX[bx+2]/PUMNORMALIZE, region.et());
+	  double regionET =  region.et() * regionLSB_;
+	  regionsPUMEta_[etaBin]->Fill(nonzeroRegionsBX[bx+2]/PUMNORMALIZE, regionET);
 	}
       }
     }

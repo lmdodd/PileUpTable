@@ -43,13 +43,8 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
-//typedef std::vector<edm::InputTag> VInputTag;
-//typedef std::vector<unsigned int> PackedUIntCollection;
-
-
 using namespace std;
 using namespace edm;
-
 
 class pum0calculator : public edm::EDAnalyzer {
 	public:
@@ -68,12 +63,10 @@ class pum0calculator : public edm::EDAnalyzer {
 		unsigned int puMult0_;
 		unsigned long int event_;
 
-		InputTag scalerSrc_;
-		InputTag uctDigis_;
-		InputTag pvSrc_;
-		InputTag vertexSrc_;
-		InputTag regionSrc_;
-		InputTag genSrc_;
+  edm::EDGetTokenT<L1CaloRegionCollection> regionToken;
+  edm::EDGetTokenT<LumiScalersCollection> scalerToken;
+  edm::EDGetTokenT<reco::VertexCollection> vertexToken;
+  edm::EDGetTokenT<std::vector<PileupSummaryInfo>> puToken;
 
 		float instLumi_;
 		unsigned int npvs_;
@@ -81,7 +74,6 @@ class pum0calculator : public edm::EDAnalyzer {
 		Handle<L1CaloRegionCollection> newRegions;
 		Handle<LumiScalersCollection> lumiScalers;
 		Handle<std::vector<PileupSummaryInfo> > puInfo;
-		//53X
 		Handle<reco::VertexCollection> vertices_r;
 
 		vector<float> regionPt_;
@@ -96,7 +88,11 @@ class pum0calculator : public edm::EDAnalyzer {
 };
 
 
-pum0calculator::pum0calculator(const edm::ParameterSet& pset) 
+pum0calculator::pum0calculator(const edm::ParameterSet& pset) :
+  regionToken(consumes<L1CaloRegionCollection>(pset.getParameter<edm::InputTag>("regionSrc"))),
+  scalerToken(consumes<LumiScalersCollection>(pset.getParameter<InputTag>("scalerSrc"))),
+  vertexToken(consumes<reco::VertexCollection>(pset.getParameter<InputTag>("vertexSrc"))),
+  puToken(consumes<std::vector<PileupSummaryInfo>>(pset.getParameter<InputTag>("puSrc")))
 {
 	// Initialize the ntuple builder
 	edm::Service<TFileService> fs;
@@ -110,17 +106,9 @@ pum0calculator::pum0calculator(const edm::ParameterSet& pset)
 	tree->Branch("npvs", &npvs_, "npvs/i");
 	tree->Branch("instlumi", &instLumi_, "instlumi/F");
 	tree->Branch("puMult0", &puMult0_, "puMult0/i");
-	scalerSrc_ = pset.exists("scalerSrc") ? pset.getParameter<InputTag>("scalerSrc") : InputTag("scalersRawToDigi");
-	genSrc_ = pset.exists("genSrc") ? pset.getParameter<InputTag>("genSrc") : InputTag("genParticles");
-	//emulation variables
-	//53x
-	vertexSrc_ = pset.exists("vertexSrc") ? pset.getParameter<InputTag>("vertexSrc") : InputTag("offlinePrimaryVertices");
-	regionSrc_ = pset.exists("regionSrc") ? pset.getParameter<InputTag>("regionSrc") : InputTag("simCaloStage2Layer1Digis");
-	pvSrc_ = pset.exists("pvSrc") ? pset.getParameter<InputTag>("pvSrc") : InputTag("addPileupInfo");
 	regionLSB_ = pset.getParameter<double>("regionLSB");
 	isMC_ = pset.getParameter<bool>("isMC");
 }
-
 
 void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 
@@ -129,16 +117,9 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
 	lumi_ = evt.id().luminosityBlock();
 	event_ = evt.id().event();
 
-	// Get instantaneous lumi from the scalers
-	// thx to Carlo Battilana
-	//Handle<LumiScalersCollection> lumiScalers;
-	//Handle<L1CaloRegionCollection> newRegions;
-	//edm::DetSetVector<L1CaloRegionCollection> newRegion;
-	//edm::Handle<L1CaloRegionCollection>::const_iterator newRegion;
-
-	evt.getByLabel(scalerSrc_, lumiScalers);
-	evt.getByLabel(regionSrc_, newRegions);
-	evt.getByLabel(vertexSrc_, vertices_r);
+	//evt.getByToken(scalerToken, lumiScalers);
+	evt.getByToken(regionToken, newRegions);
+	evt.getByToken(vertexToken, vertices_r);
 
 	regionEta_.clear();
 	regionPhi_.clear();
@@ -151,7 +132,7 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
         //53X
 	npvs_ = vertices_r->size();
 	if (isMC_){	
-    evt.getByLabel(pvSrc_, puInfo);
+	  evt.getByToken(puToken, puInfo);
         for (vector<PileupSummaryInfo>::const_iterator PVI = puInfo->begin(); PVI != puInfo->end(); ++PVI){	
             int BX = PVI->getBunchCrossing();
             if (BX==0){
@@ -160,8 +141,7 @@ void pum0calculator::analyze(const edm::Event& evt, const edm::EventSetup& es) {
          }
         }
 
-	if (lumiScalers->size())
-		instLumi_ = lumiScalers->begin()->instantLumi();
+	//if (lumiScalers->size()) instLumi_ = lumiScalers->begin()->instantLumi();
 
 
 

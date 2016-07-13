@@ -36,7 +36,7 @@ class PUMcorrelation : public edm::EDAnalyzer {
     virtual void beginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&);
 
     edm::EDGetTokenT<L1CaloRegionCollection> regionSource_;
-    edm::EDGetTokenT<LumiScalersCollection> lumiScalerSource_;
+  //    edm::EDGetTokenT<LumiScalersCollection> lumiScalerSource_;
     edm::EDGetTokenT<reco::VertexCollection> vertexSource_;
 
     StringCutObjectSelector<reco::Vertex, true> vertexCut_;
@@ -64,7 +64,7 @@ class PUMcorrelation : public edm::EDAnalyzer {
 
 PUMcorrelation::PUMcorrelation(const edm::ParameterSet& pset) :
   regionSource_(consumes<L1CaloRegionCollection>(pset.getParameter<edm::InputTag>("regionSource"))),
-  lumiScalerSource_(consumes<LumiScalersCollection>(pset.getParameter<edm::InputTag>("lumiScalerSource"))),
+  //  lumiScalerSource_(consumes<LumiScalersCollection>(pset.getParameter<edm::InputTag>("lumiScalerSource"))),
   vertexSource_(consumes<reco::VertexCollection>(pset.getParameter<edm::InputTag>("vertexSource"))),
   vertexCut_(pset.getParameter<std::string>("vertexCut")),
   checkFEDInLumis_(pset.getUntrackedParameter<bool>("checkFEDInLumis", false)),
@@ -83,6 +83,10 @@ PUMcorrelation::PUMcorrelation(const edm::ParameterSet& pset) :
   tree_->Branch("fixedGridRhoFastjetAllCalo", &fixedGridRhoFastjetAllCalo_, "fixedGridRhoFastjetAllCalo/F");
   tree_->Branch("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll_, "fixedGridRhoFastjetAll/F");
   tree_->Branch("nonZeroRegions", &nonZeroRegions_, "nonZeroRegions/i");
+
+  consumes<double>(edm::InputTag("fixedGridRhoAll"));
+  consumes<double>(edm::InputTag("fixedGridRhoFastjetAllCalo"));
+  consumes<double>(edm::InputTag("fixedGridRhoFastjetAll"));
 }
 
 
@@ -104,6 +108,7 @@ void PUMcorrelation::analyze(const edm::Event& event, const edm::EventSetup& es)
     }
   }
 
+  /*
   edm::Handle<LumiScalersCollection> lumiScalerCollection;
   event.getByToken(lumiScalerSource_, lumiScalerCollection);
 	if ( lumiScalerCollection->size() > 0 ) {
@@ -111,6 +116,7 @@ void PUMcorrelation::analyze(const edm::Event& event, const edm::EventSetup& es)
   } else {
     instlumi_ = -1.;
   }
+  */
 
   // Hardcoded :<
   edm::Handle<double> rhoHandle;
