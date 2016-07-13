@@ -133,7 +133,6 @@ for ieta in range(26) :
               mcTable.SetBinContent(pumbin+1, 0)
               mcTable.SetBinError(pumbin+1, 0.)
        else: 
-          print 'in else'
           ietap = ieta -2
           for pumbin in range(18) :
               mcTable.SetBinContent(pumbin+1, regionSubtraction_PU40_MC13TeV[18*ietap+pumbin])
