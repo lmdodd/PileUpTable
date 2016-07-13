@@ -6,27 +6,33 @@ Pile Up Multiplicity calculation code
 To Set up 
 
 ```
-cmsrel CMSSW_7_4_5
-cd CMSSW_7_4_5/src/
+cmsrel CMSSW_8_0_14
+cd CMSSW_8_0_14/src
 cmsenv
-git cms-addpkg L1Trigger/RegionalCaloTrigger     
-git clone https://github.com/lmdodd/PileUpTable.git L1Trigger/PileUpTable
-
+git cms-init
+git remote add cms-l1t-offline git@github.com:cms-l1t-offline/cmssw.git
+git fetch cms-l1t-offline
+git cms-merge-topic cms-l1t-offline:dasu-dev-$CMSSW_VERSION
+cd L1Trigger
+git clone git@github.com:lmdodd/PileUpTable.git
+cd ..
 scram b -j 8
 ```
 
 
 To run PUM tables:
-The root file can be changed directly in makePUMTable_cfg.py, or a condor job submission can be used as in submit_pum.sh
-There is a options tag for MC and for DAta you must specify what you are running over with 
+the pum bin can be any divisor of 486
+So pumbin can be 18, 26, 36, 39, 52, etc., but the examples below uses 39. The pumbin argument can be changed.
+```
+cd L1Trigger/PileUpTable/test/
+nohup cmsRun makeUCTPUMTable_RAW.py runNumber=275832 inputFileList=Run2016C-275832-ZeroBias-RAW.txt pumbins=39 maxEvents=20000 &
+nohup cmsRun makeUCTPUMTable_RAW.py runNumber=275832 inputFileList=Run2016C-275832-ZeroBias-RAW.txt pumbins=18 maxEvents=20000 &
+```
+This generates a file in the /data/USER/UCTPUMTable-runNumber-pumbins.root area on uwlogin, where "runNumber" and "pumbins" are the arguments you gave to makeUCTPUMTable_RAW.py.
 
 ```
 cd L1Trigger/PileUpTable/test/
-cmsRun makePUMTableMC_cfg.py isMC=1 #for MC or isMC=0 for data
+#python table.py [pumbins] [runrunmber]
+python table 18 275832 #produces plots and table (see "PUMLut-18.txt") and plots comparing to 2015 40PU MC (directory plots18/)
+python table 39 275832 #produces plots and table (see "PUMLut-39.txt") and plots (directory plots39/ ) 
 ```
-this generates the file 'pum.root'
-```
-cd L1Trigger/PileUpTable/bin/
-nohup python pythonError.py /path/to/pum.root &
-```
-Note the CTP7todigi Method (validated) can be used as well.

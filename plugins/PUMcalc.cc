@@ -27,16 +27,26 @@
 
 // TODO: move to configuration?
 namespace {
-  const unsigned int R10BINS = 1024;
+  //Rank 10 / RegionLSB 
+  const unsigned int R10BINS = 2048;
   const float R10MIN = -0.5;
-  const float R10MAX = 1023.5;
-
-  const unsigned int PUMETABINS = 26;
-  const unsigned int PUMNORMALIZE = 26;
-
-  const unsigned int PUMBINS = 18;
+  const float R10MAX = 2047.5;
+  //ETABINS is number of uct region eta bins
+  const unsigned int ETABINS = 26;
+  //PUMBINS moved to parameters
+  //PUMNORMALIZE calculated from TotRegions/PUMBINS 
+  //const unsigned int PUMBINS = 18;
+  //const unsigned int PUMNORMALIZE = 26;
+  //PUMNORAMLIZE is the number you divide the NonZeroRegions by to get 
+  //the pumbin. e.g. if you have 396 regions and 18 pum bins, you divide
+  //by 22 to get which pumbin the event should be categorized as.
+  //26 eta* 18 Phi = 486 Total regions
+  //For 18 pumbins this should be 26
+  //For 39 pumbins this should be 12 
   const float PUMMIN = -0.5;
-  const float PUMMAX = 17.5;
+  const float TOTREGIONS = 486;
+  //Defined later
+  //const float PUMMAX = 17.5;
 }
 
 class PUMcalc : public edm::EDAnalyzer {
@@ -54,7 +64,8 @@ class PUMcalc : public edm::EDAnalyzer {
     TH2F* regionBxEtSum_;
     bool checkFEDInLumis_;
     int FEDIdToCheck_;
-
+    unsigned int PUMBINS;
+    unsigned int PUMNORMALIZE;
 
     bool lumiIsValid_{false};
     double regionLSB_;
@@ -66,23 +77,28 @@ PUMcalc::PUMcalc(const edm::ParameterSet& pset) :
   bunchCrossingsToUse_(pset.getParameter<std::vector<int>>("bunchCrossingsToUse")),
   checkFEDInLumis_(pset.getUntrackedParameter<bool>("checkFEDInLumis", false)),
   FEDIdToCheck_(pset.getUntrackedParameter<int>("FEDIdToCheck", 1350)),
+  PUMBINS(pset.getUntrackedParameter<int>("pumbins", 18)),
   regionLSB_(pset.getParameter<double>("regionLSB"))
 {
   edm::Service<TFileService> fs;
 
-  regionsPUMEta_.resize(PUMETABINS);
-  for (size_t ieta=0; ieta<PUMETABINS; ++ieta) {
-    regionsPUMEta_[ieta] = fs->make<TH2F>(("regionsPUMEta"+std::to_string(ieta)).c_str(), "PUM Bin rank distribution;PU bin;Rank", PUMBINS, PUMMIN, PUMMAX, R10BINS, R10MIN, R10MAX);
+  PUMNORMALIZE=TOTREGIONS/PUMBINS;
+
+  regionsPUMEta_.resize(ETABINS);
+  for (size_t ieta=0; ieta<ETABINS; ++ieta) {
+    regionsPUMEta_[ieta] = fs->make<TH2F>(("regionsPUMEta"+std::to_string(ieta)).c_str(), "PUM Bin rank distribution;PU bin;Rank", PUMBINS, PUMMIN, PUMMIN+PUMBINS, R10BINS, R10MIN, R10MAX);
   }
 
-  regionBxPopulation_ = fs->make<TH2F>("regionBxPopulation", "Event counts per region per bunch crossing;Region index (18*eta+phi);BX index;Counts", 396, -0.5, 395.5, 5, -2.5, 2.5);
-  regionBxEtSum_ = fs->make<TH2F>("regionBxEtSum", "Et per region per bunch crossing;Region index (18*eta+phi);BX index;Counts*et", 396, -0.5, 395.5, 5, -2.5, 2.5);
+  regionBxPopulation_ = fs->make<TH2F>("regionBxPopulation", "Event counts per region per bunch crossing;Region index (PUMBINS*eta+phi);BX index;Counts", TOTREGIONS, R10MIN, R10MIN+TOTREGIONS, 5, -2.5, 2.5);
+  regionBxEtSum_ = fs->make<TH2F>("regionBxEtSum", "Et per region per bunch crossing;Region index (PUMBINS*eta+phi);BX index;Counts*et",TOTREGIONS, R10MIN, R10MIN+TOTREGIONS, 5, -2.5, 2.5);
 }
 
 
 void PUMcalc::analyze(const edm::Event& event, const edm::EventSetup& es)
 {
   if ( ! lumiIsValid_ ) return;
+  
+
 
   edm::Handle<L1CaloRegionCollection> regionCollection;
   event.getByToken(regionSource_, regionCollection);
@@ -95,20 +111,20 @@ void PUMcalc::analyze(const edm::Event& event, const edm::EventSetup& es)
       nonzeroRegionsBX[region.bx()+2]++;
     }
     size_t etaBin = 0xDEADBEEF;
-    if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (PUMETABINS / 2);
+    if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (ETABINS / 2);
     else etaBin = getRegionNumber(region.gctEta());
-    if(etaBin < PUMETABINS) {
-      regionBxPopulation_->Fill(etaBin*18+region.gctPhi(), region.bx());
-      regionBxEtSum_->Fill(etaBin*18+region.gctPhi(), region.bx(), region.et());
+    if(etaBin < ETABINS) {
+      regionBxPopulation_->Fill(etaBin*PUMBINS+region.gctPhi(), region.bx());
+      regionBxEtSum_->Fill(etaBin*PUMBINS+region.gctPhi(), region.bx(), region.et());
     }
   }
  
   for ( auto bx : bunchCrossingsToUse_ ) {
     for (const auto& region : *regionCollection) {
       size_t etaBin = 0xDEADBEEF;
-      if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (PUMETABINS / 2);
+      if(isNegativeEtaSide(region.gctEta())) etaBin = getRegionNumber(region.gctEta()) + (ETABINS / 2);
       else etaBin = getRegionNumber(region.gctEta());
-      if(etaBin < PUMETABINS) {
+      if(etaBin < ETABINS) {
 	if ( region.bx() == bx ) {
 	  assert( std::abs(bx) < 3 );
 	  double regionET =  region.et() * regionLSB_;
