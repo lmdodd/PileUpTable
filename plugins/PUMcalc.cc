@@ -30,7 +30,7 @@ namespace {
   //Rank 10 / RegionLSB 
   const unsigned int R10BINS = 2048;
   const float R10MIN = -0.5;
-  const float R10MAX = 2047.5;
+  const float R10MAX = 1023.5;
   //ETABINS is number of uct region eta bins
   const unsigned int ETABINS = 26;
   //PUMBINS moved to parameters
